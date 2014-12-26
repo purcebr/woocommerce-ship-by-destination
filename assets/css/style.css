@@ -1,0 +1,62 @@
+table.ship_zones_country {
+	width:370px;
+	padding-top:10px;
+	padding-bottom:10px;
+}
+
+table.ship_zones_edit {
+
+    width: auto;
+    min-width: 0;
+    display: table;
+
+}
+
+.ship_zones_edit th {
+width:225px;
+
+}
+
+.ship_zones_country label {
+	width:100%;
+	text-align:left;
+}
+
+.ship_zones_country th {
+	text-align:left;
+	font-weight:normal;
+	}
+
+.ship_zones_country tr {
+position:relative;
+	padding-top:5px;
+	padding-bottom:5px;
+	
+}
+
+.ship_zones_country td.forminp {
+width:225px;
+}
+select.use_custom_error {
+width:100%;
+}
+select.method_availability {
+width:100%;
+}
+
+input.custom_error{
+width:100%;
+}
+
+.ship_zones_country .chzn-container {
+width:100% !important;
+
+}
+
+.ship_zones_country .chzn-results {
+height:80px;
+}
+
+.chosen_select {
+	width:225px !important;
+}

@@ -1,0 +1,7 @@
+*** Ship By Destination ***
+
+2012.12.18 - version 1.0.1
+	* Fixed bug that caused a warning message to appear when a class had been last saved before plugin activation.
+
+2011.12.07 - version 1.0
+	* First Release
