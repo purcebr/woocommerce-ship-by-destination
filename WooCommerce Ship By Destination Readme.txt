@@ -1,12 +1,13 @@
-"WooCommerce Ship By Destination" Version 1.0
-avEIGHT
-12/5/12
+"WooCommerce Ship By Destination" 
+Version 1.1
+Bryan Purcell
+1/1/15
 
 *** Introduction ***
 
 "WooCommerce Ship By Destination" plugin allows WooCommerce Administrators to limit products by country on per-shipping-class. A custom error message can be entered, which is presented to users attempting to calculate shipping or check-out with invalid products in the shopping cart as determined by the Shipping Class rules. Users are alerted wherever shipping rates are calculated. Alternatively, Admins can opt to not show a custom error, and simply fall back to the built in "Sorry no shipping methods are available" shown when rates are calculated.
 
-** *Setup ***
+*** Setup ***
 
 To configure "WooCommerce Ship By Destination", first make sure you are running the latest version of WooCommerce. Next, upload to /wp-content/plugins folder, and activate through the dashboard.
 
