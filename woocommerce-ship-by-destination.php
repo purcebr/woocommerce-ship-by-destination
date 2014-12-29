@@ -30,7 +30,6 @@ class WC_Ship_By_Destination {
 		add_action( 'created_product_shipping_class', array( $this, 'save_extra_fields_callback' ), 10, 2);
 		
 		add_action( 'admin_enqueue_scripts', array( $this, 'ship_by_destination_scripts' ), 10 );
-
 	
 		/* Filters */	
 
@@ -48,7 +47,7 @@ class WC_Ship_By_Destination {
 		$screen = get_current_screen();
 
 		if(!$screen->base == 'edit-tags' || !$screen->taxonomy == 'product_shipping_class')
-			continue;
+			return;
 
 		wp_register_script( 'chosenmin-wc-ship-by-destination', $this->get_plugin_url() . '/assets/js/chosen/chosen.jquery.min.js?ver=1.6.5.2' );
 		wp_register_script( 'wc-ship-by-destination-js', $this->get_plugin_url() . '/assets/js/woocommerce-ship-by-destination.js' );
@@ -124,6 +123,11 @@ class WC_Ship_By_Destination {
 		global $woocommerce;
 		$countries = $woocommerce->countries->countries;
 		asort($countries);
+
+		if($term_data['use_custom_error'] == 'default')
+			$has_custom_error = false;
+		else
+			$has_custom_error = true;
 		
 		include('views/edit_shipping_meta.php');
 	}
@@ -144,6 +148,10 @@ class WC_Ship_By_Destination {
 	        }
 	        //save the option array
 	        update_option( "product_shipping_class_$t_id", $term_meta );
+
+	        //Clear rate cache
+	        global $wpdb;
+	    	$wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE ('_transient_wc_ship_%')" );
 	    }
 	}
 
@@ -168,7 +176,6 @@ class WC_Ship_By_Destination {
 		$pass = true;
 
 		foreach(array_unique($shipping_classes) as $class) {
-			
 			$class_meta = get_option("product_shipping_class_" . $class);
 		
 			if(isset($class_meta['woocommerce_zones_shipping_countries']) && is_array($class_meta['woocommerce_zones_shipping_countries'])) {

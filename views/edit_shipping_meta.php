@@ -11,7 +11,6 @@
 			</fieldset>
 		</td>
 	</tr>
-
 	<tr id="shipping_countries_list" class="form-field" valign="top">
 		<th scope="row" class="titledesc">
 			<label for="woocommerce_zones_shipping_countries"><?php _e('Selected Countries','woocommerce_ship_by_destination'); ?></label>
@@ -27,26 +26,12 @@
 	        <span class="description"><?php _e('Countries to allow for this shipping class.','woocommerce_ship_by_destination'); ?></span>
    		</td>
    	</tr>
-
-	<tr class="form-field" >     
+	<tr class="form-field">     
 		<th scope="row" class="titledesc"><label for="use_custom_error"><?php _e('Use Custom Error','woocommerce_ship_by_destination'); ?></label></th>
 		<td class="forminp">
 			<fieldset>
 				<legend class="screen-reader-text"><span><?php _e('Custom Error','woocommerce_ship_by_destination'); ?></span></legend>
-
-				<?php 
-				if($term_data['use_custom_error'] == 'all')
-					$default = ' selected="selected" ';
-				else
-					$default = '';
-
-				if($term_data['use_custom_error'] == 'custom')
-					$custom = ' selected="selected" ';
-				else
-					$custom = '';
-				?>
-
-				<select  id="has_custom_error" name="term_meta[use_custom_error]" id="use_custom_error" style="" class="select use_custom_error"><option value="default" <?php echo $default; ?> ><?php _e('Default Error','woocommerce_ship_by_destination'); ?></option><option value="custom" <?php echo $custom; ?> ><?php _e('Add Custom Error','woocommerce_ship_by_destination'); ?></option></select><br />
+				<select  id="has_custom_error" name="term_meta[use_custom_error]" id="use_custom_error" style="" class="select use_custom_error"><option value="default" <?php echo (!$has_custom_error) ? " selected='selected' " : ''; ?> ><?php _e('Default Error','woocommerce_ship_by_destination'); ?></option><option value="custom" <?php echo ($has_custom_error) ? " selected='selected' " : ''; ?> ><?php _e('Add Custom Error','woocommerce_ship_by_destination'); ?></option></select><br />
 				<span class="description"><?php _e('Use a custom error message when the customer cannot check out.','woocommerce_ship_by_destination'); ?></span>
 			</fieldset>
 		</td>
