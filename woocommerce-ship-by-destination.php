@@ -33,7 +33,6 @@ class WC_Ship_By_Destination {
 		add_action( 'admin_enqueue_scripts', array( $this, 'ship_by_destination_admin_scripts' ), 10 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'ship_by_destination_public_scripts' ) );
 
-	
 		/* Frontend Functionality */
 
 		add_action('woocommerce_checkout_process',array( $this, 'wc_ship_destination_get_available_shipping_methods_process' ));

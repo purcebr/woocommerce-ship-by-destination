@@ -43,7 +43,6 @@ function myplugin_woocommerce_locate_template( $template, $template_name, $templ
   );
  
  
- 
   // Modification: Get the template from this plugin, if it exists
  
   if ( ! $template && file_exists( $plugin_path . $template_name ) )
