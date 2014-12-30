@@ -285,6 +285,9 @@ class WC_Ship_By_Destination {
 		$notices = $errors = array();
 
 		if(isset(WC()->customer->country) && WC()->customer->country != '' ) {
+
+			/* Starts with the Default country for a guest, or a pre-saved country for a signed-up user */
+
 			$customer_country = WC()->customer->country;
 
 			/* Loop through the shipping classes to figure out if any rules need apply to products in the cart */
@@ -305,13 +308,13 @@ class WC_Ship_By_Destination {
 						if(isset($class_meta['use_custom_error']) && $class_meta['use_custom_error'] == 'custom' && isset($class_meta['custom_error']) && $class_meta['custom_error'] != '') {
 							$errors[] = $class_meta['custom_error'];	
 						} else {
-							$errors[] = __("Could not process because selected product(s) are unavailble in your country.");
+							$errors[] = __("Product(s) in your cart are not available in the selected country.");
 						}
 
 						if(isset($class_meta['use_custom_notice']) && $class_meta['use_custom_notice'] == 'custom' && isset($class_meta['custom_notice']) && $class_meta['custom_notice'] != '') {
 							$notices[] = $class_meta['custom_notice'];	
 						} else {
-							$notices[] = __("Product(s) not available in all countries. Please make sure the products in your cart are available in your country.");
+							$notices[] = __("Product(s) in your cart not available select countries. Please make sure the products in your cart are available in your country.");
 						}
 					}
 				}

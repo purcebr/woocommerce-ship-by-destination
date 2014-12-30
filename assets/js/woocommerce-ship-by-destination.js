@@ -46,14 +46,6 @@ jQuery(window).load(function(){
 		countrySelectBox.toggle();
 		customBoxes.toggle();
 
-		// if(useCustomErrorSettings.val() == 'default') {
-		// 	customError.hide();
-		// }
-
-		// if(useCustomNoticeSettings.val() == 'default') {
-		// 	customNotice.hide();
-		// }
-
 	});
 
 
