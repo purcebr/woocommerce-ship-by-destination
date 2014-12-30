@@ -10,7 +10,9 @@ jQuery(window).load(function(){
 	var countrySettingsSelect = jQuery('select.method_availability');
 	var countrySelectBox = jQuery('#shipping_countries_list');
 	var useCustomErrorSettings = jQuery('#has_custom_error');
+	var useCustomNoticeSettings = jQuery('#has_custom_notice');
 	var customError = jQuery('#custom_shipping_error');
+	var customNotice = jQuery('#custom_shipping_notice');
 
 
 	if(countrySettingsSelect.val() == 'all') {
@@ -21,10 +23,21 @@ jQuery(window).load(function(){
 		customError.hide();
 	}
 
+	if(useCustomNoticeSettings.val() == 'default') {
+		customNotice.hide();
+	}
+
+
 	// Custom Error Settings
 
 	jQuery('select.use_custom_error').change(function(){
 		customError.toggle();
+	});
+
+	// Custom Error Settings
+
+	jQuery('select.use_custom_notice').change(function(){
+		customNotice.toggle();
 	});
 
 	// Countries Select Settings
