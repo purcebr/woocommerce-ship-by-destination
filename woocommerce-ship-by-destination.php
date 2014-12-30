@@ -14,6 +14,8 @@ Author URI: bryanpurcell.com
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
+require_once('template-locate.php');
+
 if ( ! class_exists( 'WC_Ship_By_Destination' ) ) :
 
 class WC_Ship_By_Destination {
@@ -26,8 +28,11 @@ class WC_Ship_By_Destination {
 		add_action( 'product_shipping_class_edit_form', array( $this, 'taxonomy_edit_meta_field_callback' ) ,10,2);
 		add_action( 'edited_product_shipping_class', array( $this, 'save_extra_fields_callback' ) , 10, 2);
 		add_action( 'created_product_shipping_class', array( $this, 'save_extra_fields_callback' ), 10, 2);
+		add_action( 'wp_footer', array( $this, 'insert_inline_country_js' ), 10, 2);
 		
-		add_action( 'admin_enqueue_scripts', array( $this, 'ship_by_destination_scripts' ), 10 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'ship_by_destination_admin_scripts' ), 10 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'ship_by_destination_public_scripts' ) );
+
 	
 		/* Frontend Functionality */
 
@@ -36,19 +41,21 @@ class WC_Ship_By_Destination {
 		add_filter('woocommerce_check_cart_items',array( $this, 'wc_ship_destination_get_available_shipping_methods_cart_update' ));
 		add_filter('woocommerce_product_data_tabs', array($this, 'woocommerce_product_data_tabs_override'), 20);
 
+		add_filter('woocommerce_notice_types', array($this, 'wc_ship_destination_notice_types'));
+
 		/* Localization */
 
 		load_plugin_textdomain( 'woocommerce_ship_by_destination', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 	}
 
 	/**
-	 * Enquque the plugin scripts
+	 * Enqueue the plugin admin scripts
 	 *
 	 * @access public
 	 * @return void
 	 */
 
-	public function ship_by_destination_scripts() {
+	public function ship_by_destination_admin_scripts() {
 
 		/* Register Scripts */
 		$screen = get_current_screen();
@@ -57,13 +64,27 @@ class WC_Ship_By_Destination {
 			return;
 
 		wp_register_script( 'chosenmin-wc-ship-by-destination', $this->get_plugin_url() . '/assets/js/chosen/chosen.jquery.min.js?ver=1.6.5.2' );
-		wp_register_script( 'wc-ship-by-destination-js', $this->get_plugin_url() . '/assets/js/woocommerce-ship-by-destination.js' );
+		wp_register_script( 'wc-ship-by-destination-admin-js', $this->get_plugin_url() . '/assets/js/woocommerce-ship-by-destination.js' );
 		wp_register_style( 'wc-ship-destination', $this->get_plugin_url(). '/assets/css/style.css', '', '1.0.0', 'screen' );
 
 		/* Enqueue the Scripts */
 		wp_enqueue_script( 'chosenmin-wc-ship-by-destination' );
-		wp_enqueue_script( 'wc-ship-by-destination-js');
+		wp_enqueue_script( 'wc-ship-by-destination-admin-js');
+		wp_enqueue_script( 'wc-ship-by-destination-public-js');
 		wp_enqueue_style( 'wc-ship-destination' ); 
+	}
+
+	/**
+	 * Enqueue the plugin public scripts
+	 *
+	 * @access public
+	 * @return void
+	 */
+
+	public function ship_by_destination_public_scripts() {
+		wp_enqueue_script( 'jquery');
+		wp_register_script( 'wc-ship-by-destination-public-js', $this->get_plugin_url() . '/assets/js/public.js' );
+		wp_enqueue_script( 'wc-ship-by-destination-public-js');
 	}
 
 	/**
@@ -195,13 +216,13 @@ class WC_Ship_By_Destination {
 		if( $this->has_shipping_quote_details() && WC()->cart->needs_shipping()) {
 			foreach($notices['errors'] as $error) {
 				if(!wc_has_notice($error, 'error')) {
-					wc_add_notice($error, 'error');
+					wc_add_notice($error, 'wc-ship-error');
 				}
 			}
 		} else {
 			foreach($notices['notices'] as $notice) {
 				if(!wc_has_notice($notice, 'notice')) {
-					wc_add_notice($notice, 'notice');
+					wc_add_notice($notice, 'wc-ship-notice');
 				}
 			}
 		}
@@ -234,7 +255,7 @@ class WC_Ship_By_Destination {
 
 		if(!empty($notices['errors'])) {
 			foreach($notices['errors'] as $error) {
-				wc_add_notice($error, 'error');
+				wc_add_notice($error, 'wc-ship-error');
 			}
 		}
 	}
@@ -282,7 +303,9 @@ class WC_Ship_By_Destination {
 			$shipping_classes[] = $prod->get_shipping_class_id();	
 		}
 
-		$notices = $errors = array();
+		$notices = $errors = $allowed_countries = array();
+
+
 
 		if(isset(WC()->customer->country) && WC()->customer->country != '' ) {
 
@@ -298,8 +321,10 @@ class WC_Ship_By_Destination {
 				/* If there's a country rule in place... */
 
 				if(isset($class_meta['woocommerce_zones_shipping_countries']) && is_array($class_meta['woocommerce_zones_shipping_countries'])) {
-					
-				/* Let's see if it matches */
+				
+					$allowed_countries = array_unique( array_merge( $class_meta['woocommerce_zones_shipping_countries'] ) );
+
+					/* Let's see if it matches */
 
 					if(!in_array($customer_country, $class_meta['woocommerce_zones_shipping_countries']) && $class_meta['woocommerce_zones_availability'] == 'specific' && !empty($customer_country)) {
 
@@ -322,6 +347,8 @@ class WC_Ship_By_Destination {
 			}
 		}
 		
+		WC()->session->set('wc_ship_destination_allowed_countries', $allowed_countries);
+
 		return array( 
 			'notices' => $notices, 
 			'errors' => $errors,
@@ -340,6 +367,18 @@ class WC_Ship_By_Destination {
 		    unset($args['shipping']['class'][$key]);
 		}
 		return $args;
+	}
+
+	public function insert_inline_country_js() {
+		$allowed_countries = WC()->session->get('wc_ship_destination_allowed_countries');
+		$allowed_countries_json = json_encode( $allowed_countries );
+		echo "<script type='text/javascript'>var allowedCountries = " . $allowed_countries_json . ";</script>";
+	}
+
+	public function wc_ship_destination_notice_types($types) {
+		$types[] = 'wc-ship-error';
+		$types[] = 'wc-ship-notice';
+		return $types;
 	}
 
 }
