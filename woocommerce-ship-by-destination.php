@@ -5,7 +5,7 @@
  */
 /*woocommerce ship by destination
 Plugin Name: WooCommerce Ship By Destination
-Plugin URI: http://aveight.com
+Plugin URI: http://www.bryanpurcell.com
 Description: Allows WC admin to limit shipping classes by Destination
 Author: Bryan Purcell
 Version: 1.2
@@ -34,15 +34,11 @@ class WC_Ship_By_Destination {
 		add_action('woocommerce_checkout_process',array( $this, 'wc_ship_destination_get_available_shipping_methods_process' ));
 		add_filter('woocommerce_package_rates',array( $this, 'wc_ship_destination_get_available_shipping_methods_packages' ));
 		add_filter('woocommerce_check_cart_items',array( $this, 'wc_ship_destination_get_available_shipping_methods_cart_update' ));
-
 		add_filter('woocommerce_product_data_tabs', array($this, 'woocommerce_product_data_tabs_override'), 20);
 
 		/* Localization */
 
 		load_plugin_textdomain( 'woocommerce_ship_by_destination', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
-
-	$notice_types = apply_filters( 'woocommerce_notice_types', array( 'error', 'success', 'notice' ) );
-
 	}
 
 	/**
@@ -207,20 +203,19 @@ class WC_Ship_By_Destination {
 				if(!wc_has_notice($notice, 'notice')) {
 					wc_add_notice($notice, 'notice');
 				}
-				
 			}
 		}
 	}
 
 	/**
-	 * Check to see if customer shipping details were entered, and we can show an error instead of the notice.
+	 * Check to see if customer shipping details were entered, or packages are being returned because of a cached country or a default.
 	 *
 	 * @access public
 	 * @return void
 	 */
 
 	public function has_shipping_quote_details() {
-		if( WC()->customer->get_shipping_state() && WC()->customer->get_shipping_postcode()) {
+		if( ( WC()->customer->get_shipping_state() && WC()->customer->get_shipping_postcode() ) || WC()->customer->has_calculated_shipping() )  {
 			return true;
 		} else {
 			return false;
@@ -252,10 +247,12 @@ class WC_Ship_By_Destination {
 	 */
 
 	public function wc_ship_destination_get_available_shipping_methods_packages($methods) {
-		if(wc_notice_count( 'error' ) > 0)
+		if(wc_notice_count( 'error' ) > 0) {
 			return array();
-		else
+		}
+		else {
 			return $methods;
+		}
 	}
 
 	/**
@@ -267,13 +264,16 @@ class WC_Ship_By_Destination {
 
 	public function wc_ship_destination_is_available() {
 
-		$cart_contents = WC()->cart->cart_contents;
+		/* Retrieve all the products in the cart */
 
+		$cart_contents = WC()->cart->cart_contents;
 		$products = array();
 
 		foreach (WC()->cart->get_cart() as $cart_item_key => $values) {
 			$products[] = $values['product_id'];
 		}
+
+		/* Retrieve all the shipping classes for all the products in the cart */
 		
 		$shipping_classes = array();
 		
@@ -287,12 +287,21 @@ class WC_Ship_By_Destination {
 		if(isset(WC()->customer->country) && WC()->customer->country != '' ) {
 			$customer_country = WC()->customer->country;
 
+			/* Loop through the shipping classes to figure out if any rules need apply to products in the cart */
+
 			foreach(array_unique($shipping_classes) as $class) {
 				$class_meta = get_option("product_shipping_class_" . $class);
 			
+				/* If there's a country rule in place... */
+
 				if(isset($class_meta['woocommerce_zones_shipping_countries']) && is_array($class_meta['woocommerce_zones_shipping_countries'])) {
-					if(!in_array($customer_country, $class_meta['woocommerce_zones_shipping_countries']) && $class_meta['woocommerce_zones_availability'] == 'specific' && !empty($customer_country))
-					{
+					
+				/* Let's see if it matches */
+
+					if(!in_array($customer_country, $class_meta['woocommerce_zones_shipping_countries']) && $class_meta['woocommerce_zones_availability'] == 'specific' && !empty($customer_country)) {
+
+						/* It doesn't match one of the allowed countries, so let's load up the proper notice and error into an array of notices */
+
 						if(isset($class_meta['use_custom_error']) && $class_meta['use_custom_error'] == 'custom' && isset($class_meta['custom_error']) && $class_meta['custom_error'] != '') {
 							$errors[] = $class_meta['custom_error'];	
 						} else {
@@ -306,6 +315,7 @@ class WC_Ship_By_Destination {
 						}
 					}
 				}
+				/* Onto the next shipping class */
 			}
 		}
 		
@@ -316,7 +326,7 @@ class WC_Ship_By_Destination {
 	}
 
 	/**
-	 * Prevent the virutal product selection from hiding the shipping settings. We're using the shipping class for our Virtual Products Restrictions.
+	 * Prevent the virtual product selection from hiding the shipping settings. We're using the shipping class for our Virtual Products Restrictions.
 	 *
 	 * @access public
 	 * @return array The filter args, with the specific hide_if_virtual class unset.
@@ -332,7 +342,6 @@ class WC_Ship_By_Destination {
 }
 
 global $WC_Ship_By_Destination;
-
 $WC_Ship_By_Destination = new WC_Ship_By_Destination();
 
 endif;

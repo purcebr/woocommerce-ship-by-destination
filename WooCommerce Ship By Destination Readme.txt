@@ -1,5 +1,5 @@
 "WooCommerce Ship By Destination" 
-Version 1.1
+Version 1.2
 Bryan Purcell
 1/1/15
 

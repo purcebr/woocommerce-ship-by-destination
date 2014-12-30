@@ -13,11 +13,7 @@ jQuery(window).load(function(){
 	var useCustomNoticeSettings = jQuery('#has_custom_notice');
 	var customError = jQuery('#custom_shipping_error');
 	var customNotice = jQuery('#custom_shipping_notice');
-
-
-	if(countrySettingsSelect.val() == 'all') {
-		countrySelectBox.hide();
-	}
+	var customBoxes = jQuery('.boxes_toggle');
 
 	if(useCustomErrorSettings.val() == 'default') {
 		customError.hide();
@@ -27,6 +23,10 @@ jQuery(window).load(function(){
 		customNotice.hide();
 	}
 
+	if(countrySettingsSelect.val() == 'all') {
+		countrySelectBox.hide();
+		customBoxes.hide();
+	}
 
 	// Custom Error Settings
 
@@ -44,6 +44,16 @@ jQuery(window).load(function(){
 
 	countrySettingsSelect.change(function(){
 		countrySelectBox.toggle();
+		customBoxes.toggle();
+
+		// if(useCustomErrorSettings.val() == 'default') {
+		// 	customError.hide();
+		// }
+
+		// if(useCustomNoticeSettings.val() == 'default') {
+		// 	customNotice.hide();
+		// }
+
 	});
 
 
