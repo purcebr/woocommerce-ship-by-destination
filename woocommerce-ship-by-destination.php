@@ -215,7 +215,7 @@ class WC_Ship_By_Destination {
 		if( $this->has_shipping_quote_details() && WC()->cart->needs_shipping()) {
 			foreach($notices['errors'] as $error) {
 				if(!wc_has_notice($error, 'error')) {
-					wc_add_notice($error, 'wc-ship-error');
+					wc_add_notice($error, 'error');
 				}
 			}
 		} else {
@@ -254,7 +254,7 @@ class WC_Ship_By_Destination {
 
 		if(!empty($notices['errors'])) {
 			foreach($notices['errors'] as $error) {
-				wc_add_notice($error, 'wc-ship-error');
+				wc_add_notice($error, 'error');
 			}
 		}
 	}
